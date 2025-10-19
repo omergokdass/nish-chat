@@ -1,6 +1,6 @@
 import { AuthContextProps, DecodedTokenProps, UserProps } from "@/types";
 import { useRouter } from "expo-router";
-import { ReactNode, useState, createContext, useContext} from "react";
+import { ReactNode, useState, createContext, useContext, useEffect} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from 'jwt-decode';
 import { login, register } from "@/services/authService";
@@ -19,6 +19,49 @@ export const AuthProvider = ({children}: {children: ReactNode})=>{
     const [user, setUser] = useState<UserProps | null>(null);
     const router = useRouter();
 
+    useEffect(() => {
+        loadToken();
+    }, []);
+    
+    const loadToken = async ()=>{
+        const storedToken = await AsyncStorage.getItem("token");
+        if(storedToken) {
+            try{
+                const decoded = jwtDecode<DecodedTokenProps>(storedToken);
+                if(decoded.exp && decoded.exp < Date.now() / 1000){
+                  //  token has expired, navigate to welcome page
+                  await AsyncStorage.removeItem('token');
+                  gotoWelcomePage();
+                  return;
+                }
+
+                // user is logged in 
+                setToken(storedToken);
+                setUser(decoded.user);
+
+                gotoHomePage();
+            }catch(error){
+                gotoWelcomePage();
+                console.log("failed to decode token: ", error);
+            }
+        }else{
+            gotoWelcomePage();
+        }
+    };
+
+    const gotoHomePage = ()=>{
+        // wait is only for showing splash screen
+        setTimeout(() => {
+            router.replace("/(main)/home");
+        }, 1500);
+    };
+
+    const gotoWelcomePage = ()=>{
+        // wait is only for showing splash screen
+        setTimeout(() => {
+            router.replace("/(auth)/welcome");
+        }, 1500);
+    }
     const updateToken = async (token: string)=>{
         if(token){
             setToken(token);
