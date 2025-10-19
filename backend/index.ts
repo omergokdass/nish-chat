@@ -20,17 +20,20 @@ const PORT = process.env.PORT || 3000;
 
 const server = http.createServer(app);
 
+// Try to connect to database, but don't fail if it doesn't work
 connectDB()
     .then(() => {
         console.log("Database Connected");
-        server.listen(PORT, () => {
-            console.log("Server is running on port", PORT);
-        });
     })
     .catch((error) => {
         console.log(
-            "Failed to start server due to databese connection error: ",
+            "Database connection failed, but server will still start: ",
             error
         );
     });
+
+// Start server regardless of database connection
+server.listen(PORT, () => {
+    console.log("Server is running on port", PORT);
+});
     
