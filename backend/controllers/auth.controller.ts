@@ -6,7 +6,6 @@ import { generateToken } from "../utils/token";
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
     const {email,password,name,avatar} = req.body;
     try{
-
         // check if already exists
         let user = await User.findOne({email});
         if(user){
@@ -23,7 +22,6 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
         });
 
         // hash the password
-
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
 
