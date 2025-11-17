@@ -16,6 +16,7 @@ import Button from "@/components/Button";
 import { useRouter } from "expo-router";
 import { updateProfile } from "@/socket/socketEvents";
 import * as ImagePicker from 'expo-image-picker';
+import { uploadFileToCloudinary } from "@/services/imageService";
 
 
 const ProfileModal = () => {
@@ -91,7 +92,7 @@ const ProfileModal = () => {
             }
         ])
     }
-    const onSubmit = ()=>{
+    const onSubmit = async ()=>{
         let {name, avatar} = userData;
         if(!name.trim()){
             Alert.alert('User', "please enter your name");
@@ -103,7 +104,19 @@ const ProfileModal = () => {
             avatar
         }
 
-        setLoading(true);
+        if(avatar && avatar?.uri){
+            setLoading(true);
+            const res = await uploadFileToCloudinary(avatar,"profiles");
+            // console.log("result: ", res);
+            if (res.success) {
+                data.avatar = res.data;
+            }else{
+                Alert.alert("User", res.msg);
+                setLoading(false);
+                return;
+            }
+        }
+
         updateProfile(data);
     };
     return (
