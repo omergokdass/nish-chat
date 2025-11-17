@@ -8,7 +8,7 @@ dotenv.config();
 export function initializeSocket(server:any): SocketIOServer{
     const io = new SocketIOServer(server, {
         cors: {
-            origin:"*", // allow all rigins
+            origin:"*", // allow all origins
         }
     }); // socket io server instance
 

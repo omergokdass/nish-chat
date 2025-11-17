@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
 
 export const API_URL = 
-    Platform.OS == "android" ? "http://10.0.2.2:3000" : "http://172.20.10.3:3000"
+    Platform.OS == "android" ? "http://10.0.2.2:3000" : "http://192.168.1.107:3000"
 ;
