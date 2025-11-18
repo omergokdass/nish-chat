@@ -22,22 +22,36 @@ const Register = () => {
 
     const { signUp } = useAuth();
 
-    const handleSubmit = async () =>{
-        if(!emailRef.current || !passwordRef.current || !nameRef.current){
-            Alert.alert("Sign Up", "Please fill all the fields");
-            return;
-        }
+    const handleSubmit = async () => {
+    const name = nameRef.current.trim();
+    const email = emailRef.current.trim().toLowerCase();
+    const password = passwordRef.current;
 
-        try {
-            setIsLoading(true);
-            await signUp(emailRef.current, passwordRef.current, nameRef.current, "");
-        } catch (error: any) {
-            Alert.alert("Registration Error", error.message);
-        }finally {
-            setIsLoading(false);
-        }
-    };
+    if (!name || !email || !password) {
+        Alert.alert("Sign Up", "Please fill all the fields");
+        return;
+    }
 
+    // is there "edu" after the "@"
+    const atIndex = email.indexOf("@");
+    if (atIndex === -1 || !email.substring(atIndex + 1).includes("edu")) {
+        Alert.alert(
+            "Only Student Emails",
+            "Please use your university email that contains 'edu' after @\n\nExample: name@university.edu.tr",
+            [{ text: "OK" }]
+        );
+        return;
+    }
+
+    try {
+        setIsLoading(true);
+        await signUp(email, password, name, "");
+    } catch (error: any) {
+        Alert.alert("Registration Error", error.message || "Bir hata oluştu");
+    } finally {
+        setIsLoading(false);
+    }
+};
     return (
         <KeyboardAvoidingView
             style={{ flex: 1}}
