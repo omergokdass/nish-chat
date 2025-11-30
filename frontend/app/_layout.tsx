@@ -10,7 +10,12 @@ const StackLayout = () => {
         name="(main)/profileModal"
         options={{ presentation: "modal"}}
         />
+        <Stack.Screen
+        name="(main)/newConversationModal"
+        options={{ presentation: "modal"}}
+        />
     </Stack>
+    
     );
 };
 const RootLayout = () => {

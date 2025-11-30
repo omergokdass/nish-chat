@@ -44,7 +44,7 @@ const ScreenWrapper = ({
                     },
                 ]}
                 >
-                     <StatusBar barStyle={'light-content'} backgroundColor={'tranparent'}/>
+                     <StatusBar barStyle={'light-content'} backgroundColor={'transparent'}/>
                      {children}
                 </View>
         </ImageBackground>
