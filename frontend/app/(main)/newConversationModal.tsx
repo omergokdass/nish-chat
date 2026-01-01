@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import Input from "@/components/Input";
@@ -12,18 +12,61 @@ import Typo from "@/components/Typo";
 import { useAuth } from "@/contexts/authContext";
 import Button from "@/components/Button";
 import { verticalScale } from "@/utils/styling";
+import { getContacts, newConversation } from "@/socket/socketEvents";
+import { uploadFileToCloudinary } from "@/services/imageService";
 
 
 const NewConversationModal = () => {
     const { isGroup } = useLocalSearchParams();
     const isGroupMode = isGroup == "1";
     const router = useRouter();
+    const [contacts, setContacts] = useState([]);
     const [groupAvatar, setGroupAvatar] = useState<{uri: string} | null>(null);
     const [groupName, setGroupName] = useState("");
     const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const {user: currentUser} = useAuth();
+
+    useEffect( ()=> {
+        getContacts(processGetContacts);
+        newConversation(processNewConversation);
+        getContacts(null);
+
+        return () => {
+            getContacts(processGetContacts, true);
+            newConversation(processNewConversation,true);
+        };
+    }, []);
+
+    const processGetContacts = (res:any) => {
+        //console.log("got contactss: ", res);
+        if (res.success) {
+            setContacts(res.data);
+        }
+    };
+    const processNewConversation = (res:any) => {
+        //console.log("new conversation result: ", res.data.participants);
+        setIsLoading(false);
+        if(res.success){
+            router.back();
+            router.push({
+                pathname: "/(main)/conversation",
+                params: {
+                    id: res.data._id,
+                    name: res.data.name,
+                    avatar: res.data.avatar,
+                    type: res.data.type,
+                    participants: JSON.stringify(res.data.participants),
+                }
+            });
+        }else {
+            console.log("Error fetching/creating conversation: ", res.msg);
+            Alert.alert("Error", res.msg);
+        }
+    };
+
+
         const onPickImage = async ()=> {
             let result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images', 'videos'],
@@ -60,28 +103,56 @@ const NewConversationModal = () => {
          if(isGroupMode){
             toggleParticipant(user);
         }else{
-            // todo : start new conversation
+            
+            newConversation({
+                type: "direct",
+                participants: [currentUser.id, user.id],
+            });
         }
     };
 
-    const createGroup = () =>{
-        if(!groupName.trim() || !currentUser ||selectedParticipants.length<2) return;
+    const createGroup = async () =>{
+        if(!groupName.trim() || !currentUser ||selectedParticipants.length<2) 
+            return;
 
-        // todo: create group
-    }
 
-    const contacts = [
-        {
-            id:"1",
-            name: "Liam Carter",
-            avatar: "https://i.pravatar.cc/150?img=11",
-        },
-        {
-            id:"2",
-            name: "Emma Davies",
-            avatar: "https://i.pravatar.cc/150?img=12",
-        },
-    ]
+        setIsLoading(true);
+        try{
+            let avatar = null;
+            if(groupAvatar){
+                const uploadResult = await uploadFileToCloudinary(
+                    groupAvatar, "group-avatars"
+                );
+                if(uploadResult.success) avatar = uploadResult.data;
+            }
+
+            newConversation({
+                type: 'group',
+                participants: [currentUser.id, ...selectedParticipants],
+                name: groupName,
+                avatar,
+            })
+        }catch(error: any) {
+            console.log("Error creating group: ", error);
+            Alert.alert("Error", error.message);
+        }
+        finally{
+            setIsLoading(false);
+        }
+    };
+
+    // const contacts = [
+    //     {
+    //         id:"1",
+    //         name: "Liam Carter",
+    //         avatar: "https://i.pravatar.cc/150?img=11",
+    //     },
+    //     {
+    //         id:"2",
+    //         name: "Emma Davies",
+    //         avatar: "https://i.pravatar.cc/150?img=12",
+    //     },
+    // ];
     return (
         <ScreenWrapper isModal={true}>
             <View style={styles.container}>
