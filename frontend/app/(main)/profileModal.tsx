@@ -72,7 +72,7 @@ const ProfileModal = () => {
     if (!result.canceled) {
       setUserData({ ...userData, avatar: result.assets[0] });
     }
-    }
+    };
     const handleLogout = async ()=>{
         router.back();
         await signOut();
