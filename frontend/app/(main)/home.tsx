@@ -3,7 +3,7 @@ import ScreenWrapper from "@/components/ScreenWrapper"
 import Typo from "@/components/Typo"
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
-import { getConversations, newConversation, testSocket } from "@/socket/socketEvents";
+import { getConversations, newConversation, newMessage, testSocket } from "@/socket/socketEvents";
 import { verticalScale } from "@/utils/styling";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View} from "react-native";
@@ -25,13 +25,30 @@ const Home = () => {
     useEffect(() => {
         getConversations(processConversations);
         newConversation(newConversationHandler);
+        newMessage(newMessageHandler);
+
         getConversations(null);
 
         return() => {
             getConversations(processConversations, true);
             newConversation(newConversationHandler, true);
+            newMessage(newMessageHandler, true)
         };
     }, []);
+
+    const newMessageHandler = (res: ResponseProps)=>{
+        if(res.success){
+            let conversationId = res.data.conversationId;
+            setConversations((prev)=>{
+                let updatedConversations = prev.map((item)=>{
+                    if(item._id == conversationId) item.lastMessage = res.data;
+                    return item;
+                })
+                return updatedConversations;
+            })
+
+        }
+    }
 
     const processConversations = (res: ResponseProps) => {
         // console.log("res: ", res);

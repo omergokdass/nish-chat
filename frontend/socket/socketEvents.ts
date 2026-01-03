@@ -84,3 +84,35 @@ const socket = getSocket();
         socket.emit("getConversations", payload); // sending payload as data
     }
 };
+export const newMessage = (payload: any, off: boolean = false) => {
+const socket = getSocket();
+    if (!socket) {
+        console.log("Socket is not connected");
+        return;
+    }
+
+    if (off) {
+        // turn of listing to this event
+        socket.off("newMessage", payload); // payload is the callback
+    } else if(typeof payload == "function") {
+        socket.on("newMessage", payload); // payload as callback for this event
+    } else {
+        socket.emit("newMessage", payload); // sending payload as data
+    }
+};
+export const getMessages = (payload: any, off: boolean = false) => {
+const socket = getSocket();
+    if (!socket) {
+        console.log("Socket is not connected");
+        return;
+    }
+
+    if (off) {
+        // turn of listing to this event
+        socket.off("getMessages", payload); // payload is the callback
+    } else if(typeof payload == "function") {
+        socket.on("getMessages", payload); // payload as callback for this event
+    } else {
+        socket.emit("getMessages", payload); // sending payload as data
+    }
+};

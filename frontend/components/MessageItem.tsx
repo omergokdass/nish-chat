@@ -5,6 +5,8 @@ import { verticalScale } from "@/utils/styling";
 import { StyleSheet, Text, View } from "react-native"
 import Avatar from "./Avatar";
 import Typo from "./Typo";
+import moment from "moment";
+import { Image } from "expo-image";
 
 
 const MessageItem = ({
@@ -13,7 +15,14 @@ const MessageItem = ({
 }: {item: MessageProps, isDirect: boolean}) => {
 
     const {user:currentUser} = useAuth();
-    const isMe = item.isMe;
+    const isMe = currentUser?.id == item?.sender?.id;
+
+
+    const formattedDate = moment(item.createdAt).isSame(moment(), "day")?
+    moment(item.createdAt).format("h:mm A"):
+    moment(item.createdAt).format("MMM D, h:mm A");
+
+    // console.log("message item: ", item);
     return (
         <View
         style={[
@@ -24,7 +33,7 @@ const MessageItem = ({
         >
             {
                 !isMe && !isDirect && (
-                    <Avatar size={30} uri={null} style={styles.messageAvatar}/>
+                    <Avatar size={30} uri={item?.sender?.avatar} style={styles.messageAvatar}/>
             )}
             <View
                 style={[
@@ -39,6 +48,17 @@ const MessageItem = ({
                         </Typo>
                     )}
 
+                    {
+                        item.attachement && (
+                            <Image
+                                source={item.attachement}
+                                contentFit="cover"
+                                style={styles.attachment}
+                                transition={100}
+                            />
+                        )
+
+                    }
                     {item.content && <Typo size={15}>{item.content}</Typo>}
 
                     <Typo 
@@ -47,7 +67,7 @@ const MessageItem = ({
                         fontWeight={"500"}
                         color={colors.neutral600}
                     >
-                        {item.createdAt}
+                        {formattedDate}
                     </Typo>
             </View>
         </View>

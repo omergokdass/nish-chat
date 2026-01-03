@@ -11,11 +11,13 @@ import { Alert, FlatList, KeyboardAvoidingView, Platform, StyleSheet, TouchableO
 import * as Icons from "phosphor-react-native";
 import MessageItem from "@/components/MessageItem"
 import Input from "@/components/Input"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from "expo-image"
 import Loading from "@/components/Loading"
 import { uploadFileToCloudinary } from "@/services/imageService"
+import { getMessages, newMessage } from "@/socket/socketEvents"
+import { MessageProps, ResponseProps } from "@/types"
 
 
 const Conversation = () => {
@@ -33,6 +35,8 @@ const Conversation = () => {
         null
     );
     const [loading, setLoading] = useState(false);
+    const [messages, setMessages] = useState<MessageProps[]>([])
+
     const participants = JSON.parse(stringifiedParticipants as string);
 
     let conversationAvatar = avatar;
@@ -44,109 +48,102 @@ const Conversation = () => {
     let conversationName = isDirect ? otherParticipant.name : name; 
     // console.log("got conversation data: ", data);
 
-const dummyMessages = [
-    {
-        id: "msg_1",
-        sender: {
-            id: "user_2",
-            name: "Jane Smith",
-            avatar: null,
-        },
-        content: "Merhaba! Yeni mesajlaşma ekranını inceledim.",
-        createdAt: "10:35 AM",
-        isMe: false,
-    },
-    {
-        id: "msg_2",
-        sender: {
-            id: "me",
-            name: "Me",
-            avatar: null,
-        },
-        content: "Süper! Görüşlerin benim için önemli 🙂",
-        createdAt: "10:36 AM",
-        isMe: true,
-    },
-    {
-        id: "msg_3",
-        sender: {
-            id: "user_2",
-            name: "Jane Smith",
-            avatar: null,
-        },
-        content: "Mesaj balonları gayet temiz duruyor.",
-        createdAt: "10:38 AM",
-        isMe: false,
-    },
-    {
-        id: "msg_4",
-        sender: {
-            id: "me",
-            name: "Me",
-            avatar: null,
-        },
-        content: "Teşekkürler! Yakında yeni özellikler ekleyeceğim.",
-        createdAt: "10:40 AM",
-        isMe: true,
-    },
-    {
-        id: "msg_5",
-        sender: {
-            id: "user_2",
-            name: "Jane Smith",
-            avatar: null,
-        },
-        content: "Mesaj reaksiyonları eklenirse çok iyi olur!",
-        createdAt: "10:42 AM",
-        isMe: false,
-    },
-    {
-        id: "msg_6",
-        sender: {
-            id: "me",
-            name: "Me",
-            avatar: null,
-        },
-        content:
-            "Evet, mesaj reaksiyonları ve dosya paylaşımı eklemeyi düşünüyorum.",
-        createdAt: "10:43 AM",
-        isMe: true,
-    },
-    {
-        id: "msg_6",
-        sender: {
-            id: "me",
-            name: "Me",
-            avatar: null,
-        },
-        content:
-            "Evet, mesaj reaksiyonları ve dosya paylaşımı eklemeyi düşünüyorum.",
-        createdAt: "10:43 AM",
-        isMe: true,
-    },{
-        id: "msg_6",
-        sender: {
-            id: "me",
-            name: "Me",
-            avatar: null,
-        },
-        content:
-            "Evet, mesaj reaksiyonları ve dosya paylaşımı eklemeyi düşünüyorum.",
-        createdAt: "10:43 AM",
-        isMe: true,
-    },{
-        id: "msg_6",
-        sender: {
-            id: "me",
-            name: "Me",
-            avatar: null,
-        },
-        content:
-            "Evet, mesaj reaksiyonları ve dosya paylaşımı eklemeyi düşünüyorum.",
-        createdAt: "10:43 AM",
-        isMe: true,
+
+    useEffect(() =>{
+        newMessage(newMessageHandler);
+        getMessages(messagesHandler);
+
+        getMessages({conversationId});
+        return () =>{
+            newMessage(newMessageHandler, true);
+            getMessages(messagesHandler, true);
+        }
+    }, []);
+
+    const newMessageHandler = (res: ResponseProps)=>{
+        setLoading(false);
+        if(res.success){
+            if(res.data.conversationId == conversationId){
+                setMessages((prev)=> [res.data as MessageProps, ...prev]);
+            }
+        }else{
+            Alert.alert("Error", res.msg);
+        }
     }
-];
+
+    const messagesHandler = (res: ResponseProps) => {
+        if(res.success) setMessages(res.data);
+    };
+    
+// const dummyMessages = [
+//     {
+//         id: "msg_1",
+//         sender: {
+//             id: "user_2",
+//             name: "Jane Smith",
+//             avatar: null,
+//         },
+//         content: "Merhaba! Yeni mesajlaşma ekranını inceledim.",
+//         createdAt: "10:35 AM",
+//         isMe: false,
+//     },
+//     {
+//         id: "msg_2",
+//         sender: {
+//             id: "me",
+//             name: "Me",
+//             avatar: null,
+//         },
+//         content: "Süper! Görüşlerin benim için önemli 🙂",
+//         createdAt: "10:36 AM",
+//         isMe: true,
+//     },
+//     {
+//         id: "msg_3",
+//         sender: {
+//             id: "user_2",
+//             name: "Jane Smith",
+//             avatar: null,
+//         },
+//         content: "Mesaj balonları gayet temiz duruyor.",
+//         createdAt: "10:38 AM",
+//         isMe: false,
+//     },
+//     {
+//         id: "msg_4",
+//         sender: {
+//             id: "me",
+//             name: "Me",
+//             avatar: null,
+//         },
+//         content: "Teşekkürler! Yakında yeni özellikler ekleyeceğim.",
+//         createdAt: "10:40 AM",
+//         isMe: true,
+//     },
+//     {
+//         id: "msg_5",
+//         sender: {
+//             id: "user_2",
+//             name: "Jane Smith",
+//             avatar: null,
+//         },
+//         content: "Mesaj reaksiyonları eklenirse çok iyi olur!",
+//         createdAt: "10:42 AM",
+//         isMe: false,
+//     },
+//     {
+//         id: "msg_6",
+//         sender: {
+//             id: "me",
+//             name: "Me",
+//             avatar: null,
+//         },
+//         content:
+//             "Evet, mesaj reaksiyonları ve dosya paylaşımı eklemeyi düşünüyorum.",
+//         createdAt: "10:43 AM",
+//         isMe: true,
+//     },
+// ];
 
 const onPickFile = async ()=> {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -185,7 +182,19 @@ const onSend = async ()=>{
             }
         }
 
-        console.log("attachement: ", attachement);
+        newMessage({
+            conversationId,
+            sender: {
+                id: currentUser?.id,
+                name: currentUser.name,
+                avatar: currentUser.avatar,
+            },
+            content: message.trim(),
+            attachement
+        });
+
+        setMessage("");
+        setSelectedFile(null);
     }catch(error){
         console.log("Error sending message: ", error);
         Alert.alert("Error", "Failed to send message");
@@ -228,7 +237,7 @@ const onSend = async ()=>{
                 { /* messages */}
                 <View style={styles.content}>
                     <FlatList
-                        data={dummyMessages}
+                        data={messages}
                         inverted={true}
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={styles.messagesContent}
