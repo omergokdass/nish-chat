@@ -12,63 +12,63 @@ import { Image } from "expo-image";
 const MessageItem = ({
     item, isDirect
 
-}: {item: MessageProps, isDirect: boolean}) => {
+}: { item: MessageProps, isDirect: boolean }) => {
 
-    const {user:currentUser} = useAuth();
+    const { user: currentUser } = useAuth();
     const isMe = currentUser?.id == item?.sender?.id;
 
 
-    const formattedDate = moment(item.createdAt).isSame(moment(), "day")?
-    moment(item.createdAt).format("h:mm A"):
-    moment(item.createdAt).format("MMM D, h:mm A");
+    const formattedDate = moment(item.createdAt).isSame(moment(), "day") ?
+        moment(item.createdAt).format("h:mm A") :
+        moment(item.createdAt).format("MMM D, h:mm A");
 
     // console.log("message item: ", item);
     return (
         <View
-        style={[
+            style={[
                 styles.messageContainer,
-                isMe? styles.myMessage : styles.theirMessage
+                isMe ? styles.myMessage : styles.theirMessage
             ]}
 
         >
             {
                 !isMe && !isDirect && (
-                    <Avatar size={30} uri={item?.sender?.avatar} style={styles.messageAvatar}/>
-            )}
+                    <Avatar size={30} uri={item?.sender?.avatar} style={styles.messageAvatar} />
+                )}
             <View
                 style={[
                     styles.messageBubble,
-                    isMe? styles.myBubble: styles.theirBubble
+                    isMe ? styles.myBubble : styles.theirBubble
                 ]}
             >
                 {
-                    !isMe && !isDirect &&(
+                    !isMe && !isDirect && (
                         <Typo color={colors.neutral900} fontWeight={"600"} size={13}>
                             {item.sender.name}
                         </Typo>
                     )}
 
-                    {
-                        item.attachement && (
-                            <Image
-                                source={item.attachement}
-                                contentFit="cover"
-                                style={styles.attachment}
-                                transition={100}
-                            />
-                        )
+                {
+                    item.attachment && (
+                        <Image
+                            source={item.attachment}
+                            contentFit="cover"
+                            style={styles.attachment}
+                            transition={100}
+                        />
+                    )
 
-                    }
-                    {item.content && <Typo size={15}>{item.content}</Typo>}
+                }
+                {item.content && <Typo size={15}>{item.content}</Typo>}
 
-                    <Typo 
-                        style={{alignSelf: 'flex-end'}}
-                        size={11}
-                        fontWeight={"500"}
-                        color={colors.neutral600}
-                    >
-                        {formattedDate}
-                    </Typo>
+                <Typo
+                    style={{ alignSelf: 'flex-end' }}
+                    size={11}
+                    fontWeight={"500"}
+                    color={colors.neutral600}
+                >
+                    {formattedDate}
+                </Typo>
             </View>
         </View>
     )
