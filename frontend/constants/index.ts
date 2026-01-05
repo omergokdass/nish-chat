@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
 
 export const API_URL = 
-    Platform.OS == "android" ? "http://10.19.18.239:3000" : "http://10.19.18.239:3000";
+    Platform.OS == "android" ? "http://192.168.1.111:3000" : "http://192.168.1.105:3000";
 
 export const CLOUDINARY_CLOUD_NAME = "dzhdyjyja";
 export const CLOUDINARY_UPLOAD_PRESET = "images";    

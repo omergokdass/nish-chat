@@ -6,6 +6,9 @@ export interface UserProps extends Document {
   name?: string;
   avatar?: string;
   created?: Date;
+  isVerified?: boolean;
+  verificationCode?: string | null;
+  verificationCodeExpires?: Date | null;
 }
 
 export interface ConversationProps extends Document {

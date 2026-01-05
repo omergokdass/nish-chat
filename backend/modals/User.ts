@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import type { UserProps } from "../types.ts";
 
-const UserSchema = new Schema<UserProps> ({
+const UserSchema = new Schema<UserProps>({
     email: {
         type: String,
         required: true,
@@ -24,6 +24,18 @@ const UserSchema = new Schema<UserProps> ({
     created: {
         type: Date,
         default: Date.now,
+    },
+    isVerified: {
+        type: Boolean,
+        default: false,
+    },
+    verificationCode: {
+        type: String,
+        default: null,
+    },
+    verificationCodeExpires: {
+        type: Date,
+        default: null,
     },
 });
 
